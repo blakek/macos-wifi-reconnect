@@ -8,14 +8,12 @@ set -eu -o pipefail
 # Set TRACE to show all commands that are executed
 [[ "${TRACE:-}" ]] && set -x
 
-declare -Ar globals=(
-	# The directory of the currently running file
-	['cwd']="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-	# The filename of the currently running file
-	['filename']="$(basename "${BASH_SOURCE[0]}")"
-	# The script's version
-	['version']='1.0.0'
-)
+# The directory of the currently running file
+__dirname="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The filename of the currently running file
+__filename="$(basename "${BASH_SOURCE[0]}")"
+# The script's version
+__version='1.0.0'
 
 showUsage() {
 	cat <<-END
@@ -23,7 +21,7 @@ showUsage() {
 		NOTE: This script requires running as root.
 
 		Usage:
-		    ${globals[filename]} [options]
+		    ${__filename} [options]
 
 		Options:
 		    -h, --help                Show usage information and exit
@@ -89,7 +87,7 @@ main() {
 				shift
 				;;
 			-V | --version)
-				echo "${globals['version']}"
+				echo "${__version}"
 				exit
 				;;
 			-*)
