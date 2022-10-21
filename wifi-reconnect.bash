@@ -55,7 +55,9 @@ main() {
 	local verbose='false'
 
 	debugLog() {
-		[[ ${verbose} == 'true' ]] && echo "[$(timestamp)]: $*"
+		if [[ ${verbose} == 'true' ]]; then
+			echo "[$(timestamp)]: $*"
+		fi
 	}
 
 	errorLog() {
