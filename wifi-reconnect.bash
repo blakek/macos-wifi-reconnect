@@ -25,7 +25,7 @@ showUsage() {
 
 		Options:
 		    -h, --help                Show usage information and exit
-		    -i, --interval <seconds>  The interval in seconds to check the connection (default: 10)
+		    -i, --interval <seconds>  The interval in seconds to check the connection (default: 180)
 		    -s, --ssid <ssid>         The SSID (i.e. name) of the Wi-Fi network to reconnect to
 		    -v, --verbose             Print more information
 		    -V, --version             Show the version number and exit
@@ -48,7 +48,7 @@ reconnect() {
 }
 
 main() {
-	local interval=10
+	local interval=180
 	local ssid
 	local verbose='false'
 
