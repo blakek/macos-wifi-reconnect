@@ -67,9 +67,6 @@ main() {
 		exit 1
 	}
 
-	# Ensure running as root
-	[[ $EUID -eq 0 ]] || panic 'This script must be run as root.'
-
 	# Parse arguments
 	for arg in "$@"; do
 		case "$arg" in
@@ -98,6 +95,9 @@ main() {
 				;;
 		esac
 	done
+
+	# Ensure running as root
+	[[ $EUID -eq 0 ]] || panic 'This script must be run as root.'
 
 	# Set SSID to current SSID if not set
 	if [[ -z ${ssid:-} ]]; then
