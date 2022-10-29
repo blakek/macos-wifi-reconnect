@@ -3,6 +3,11 @@ PREFIX ?= /usr/local/bin
 LAUNCH_LOCATION ?= /Library/LaunchDaemons
 LAUNCH_NAME ?= me.blakek.wifi-reconnect
 
+ifdef DEBUG
+  DEBUG_ARGS ?= <string>--verbose</string><string>--interval 10</string>
+  DEBUG_CONFIG ?= <key>StandardOutPath</key><string>/tmp/$(LAUNCH_NAME).log</string><key>StandardErrorPath</key><string>/tmp/$(LAUNCH_NAME).log</string>
+endif
+
 .PHONY: all
 all: install
 
@@ -10,6 +15,8 @@ $(LAUNCH_NAME).plist:
 	sed -e "s|{{prefix}}|$(PREFIX)|g" \
 		-e "s|{{name}}|$(NAME)|g" \
 		-e "s|{{launchName}}|$(LAUNCH_NAME)|g" \
+		-e "s|{{debugArgs}}|$(DEBUG_ARGS)|g" \
+		-e "s|{{debugConfig}}|$(DEBUG_CONFIG)|g" \
 		`pwd`/launch-agent.template.plist > $(LAUNCH_NAME).plist
 
 .PHONY: install-launchd

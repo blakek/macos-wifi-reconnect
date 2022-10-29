@@ -7,18 +7,13 @@
     <key>ProgramArguments</key>
     <array>
         <string>{{prefix}}/{{name}}</string>
+        {{debugArgs}}
     </array>
+    
     <key>KeepAlive</key>
     <true/>
     <key>ProcessType</key>
     <string>Background</string>
-
-    <!-- For debugging: -->
-    <!--
-    <key>StandardOutPath</key> 
-    <string>/tmp/{{launchName}}.log</string> 
-    <key>StandardErrorPath</key> 
-    <string>/tmp/{{launchName}}.log</string>
-    -->
+    {{debugConfig}}
 </dict>
 </plist>
