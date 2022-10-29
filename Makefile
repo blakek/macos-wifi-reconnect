@@ -49,3 +49,11 @@ load:
 .PHONY: unload
 unload:
 	launchctl unload $(LAUNCH_LOCATION)/$(LAUNCH_NAME).plist
+
+# Full install and load for testing
+.PHONY: install-debug
+install-debug: DEBUG=1 install load
+
+# Full uninstall and unload for testing
+.PHONY: uninstall-debug
+uninstall-debug: unload uninstall
