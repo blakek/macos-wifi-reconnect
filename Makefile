@@ -3,13 +3,14 @@ PREFIX ?= /usr/local/bin
 LAUNCH_LOCATION ?= /Library/LaunchDaemons
 LAUNCH_NAME ?= me.blakek.wifi-reconnect
 
-ifdef DEBUG
-  DEBUG_ARGS ?= <string>--verbose</string><string>--interval</string><string>10</string>
-  DEBUG_CONFIG ?= <key>StandardOutPath</key><string>/tmp/$(LAUNCH_NAME).log</string><key>StandardErrorPath</key><string>/tmp/$(LAUNCH_NAME).log</string>
-endif
-
 .PHONY: all
 all: install
+
+.PHONY: set-debug-vars
+set-debug-vars:
+	@echo "Setting debug variables"
+	$(eval DEBUG_ARGS ?= <string>--verbose</string><string>--interval</string><string>10</string>)
+	$(eval DEBUG_CONFIG ?= <key>StandardOutPath</key><string>/tmp/$(LAUNCH_NAME).log</string><key>StandardErrorPath</key><string>/tmp/$(LAUNCH_NAME).log</string>)
 
 $(LAUNCH_NAME).plist:
 	sed -e "s|{{prefix}}|$(PREFIX)|g" \
@@ -52,9 +53,8 @@ unload:
 
 # Full install and load for testing
 .PHONY: install-debug
-install-debug: export DEBUG = 1
-install-debug: install load
+install-debug: set-debug-vars install load
 
 # Full uninstall and unload for testing
 .PHONY: uninstall-debug
-uninstall-debug: unload uninstall
+uninstall-debug: set-debug-vars unload uninstall
