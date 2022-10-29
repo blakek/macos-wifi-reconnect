@@ -39,3 +39,13 @@ symlink: install-launchd
 uninstall:
 	rm $(PREFIX)/$(NAME)
 	rm $(LAUNCH_LOCATION)/$(LAUNCH_NAME).plist
+
+# Loads the launchd agent
+.PHONY: load
+load:
+	launchctl load $(LAUNCH_LOCATION)/$(LAUNCH_NAME).plist
+
+# Unloads the launchd agent
+.PHONY: unload
+unload:
+	launchctl unload $(LAUNCH_LOCATION)/$(LAUNCH_NAME).plist
