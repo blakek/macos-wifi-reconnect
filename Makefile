@@ -4,7 +4,7 @@ LAUNCH_LOCATION ?= /Library/LaunchDaemons
 LAUNCH_NAME ?= me.blakek.wifi-reconnect
 
 ifdef DEBUG
-  DEBUG_ARGS ?= <string>--verbose</string><string>--interval 10</string>
+  DEBUG_ARGS ?= <string>--verbose</string><string>--interval</string><string>10</string>
   DEBUG_CONFIG ?= <key>StandardOutPath</key><string>/tmp/$(LAUNCH_NAME).log</string><key>StandardErrorPath</key><string>/tmp/$(LAUNCH_NAME).log</string>
 endif
 
