@@ -12,5 +12,13 @@
     <true/>
     <key>ProcessType</key>
     <string>Background</string>
+
+    <!-- For debugging: -->
+    <!--
+    <key>StandardOutPath</key> 
+    <string>/tmp/{{launchName}}.out</string> 
+    <key>StandardErrorPath</key> 
+    <string>/tmp/{{launchName}}.err</string>
+    -->
 </dict>
 </plist>
