@@ -35,6 +35,18 @@ showUsage() {
 	END
 }
 
+# Debug logs are disabled by default
+debugLog() { :; }
+
+errorLog() {
+	echo "$@" >&2
+}
+
+panic() {
+	errorLog "$@"
+	exit 1
+}
+
 airport() { /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport "$@"; }
 timestamp() { date '+%Y-%m-%dT%H:%M:%S'; }
 
@@ -61,17 +73,10 @@ main() {
 		fi
 	}
 
-	errorLog() {
-		echo "$@" >&2
-	}
-
-	panic() {
-		errorLog "$@"
-		exit 1
-	}
-
 	# Parse arguments
-	for arg in "$@"; do
+	while (($# > 0)); do
+		arg="$1"
+
 		case "$arg" in
 			-h | --help | help)
 				showUsage
@@ -79,15 +84,14 @@ main() {
 				;;
 			-i | --interval)
 				interval="$2"
-				shift 2
+				shift
 				;;
 			-s | --ssid)
 				ssid="$2"
-				shift 2
+				shift
 				;;
 			-v | --verbose)
 				verbose='true'
-				shift
 				;;
 			-V | --version)
 				echo "${__version}"
@@ -97,6 +101,8 @@ main() {
 				panic "Error: unknown option: $arg"
 				;;
 		esac
+
+		shift
 	done
 
 	# Ensure running as root
@@ -126,7 +132,6 @@ main() {
 
 		reconnect "$ssid" || errorLog "Failed to reconnect to '$ssid'"
 	done
-
 }
 
 main "$@"
