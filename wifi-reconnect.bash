@@ -36,7 +36,6 @@ showUsage() {
 }
 
 airport() { /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport "$@"; }
-airportd() { /usr/libexec/airportd "$@"; }
 timestamp() { date '+%Y-%m-%dT%H:%M:%S'; }
 
 getCurrentSSID() {
@@ -44,7 +43,11 @@ getCurrentSSID() {
 }
 
 reconnect() {
-	airportd assoc --ssid "$1"
+	local ssid="$1"
+	local password
+	password="$(security find-generic-password -a "${1}" -s 'AirPort' -w)"
+
+	networksetup -setairportnetwork en0 "${ssid}" "${password}"
 }
 
 main() {
