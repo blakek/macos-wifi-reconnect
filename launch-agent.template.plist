@@ -16,9 +16,9 @@
     <!-- For debugging: -->
     <!--
     <key>StandardOutPath</key> 
-    <string>/tmp/{{launchName}}.out</string> 
+    <string>/tmp/{{launchName}}.log</string> 
     <key>StandardErrorPath</key> 
-    <string>/tmp/{{launchName}}.err</string>
+    <string>/tmp/{{launchName}}.log</string>
     -->
 </dict>
 </plist>
