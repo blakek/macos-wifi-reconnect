@@ -1,6 +1,6 @@
 NAME ?= wifi-reconnect.bash
 PREFIX ?= /usr/local/bin
-LAUNCH_LOCATION ?= /Library/LaunchDaemons
+LAUNCH_LOCATION ?= /Library/LaunchAgents
 LAUNCH_NAME ?= me.blakek.wifi-reconnect
 
 .PHONY: all

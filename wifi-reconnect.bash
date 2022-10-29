@@ -15,9 +15,11 @@ __filename="$(basename "${BASH_SOURCE[0]}")"
 # The script's version
 __version='1.0.0'
 
+verbose='false'
+
 showUsage() {
 	cat <<-END
-		Reconncts to a certain Wi-Fi network if the connection is lost.
+		Trys to reconnect to Wi-Fi network if the connection is lost.
 		NOTE: This script requires running as root.
 
 		Usage:
@@ -26,17 +28,16 @@ showUsage() {
 		Options:
 		    -h, --help                Show usage information and exit
 		    -i, --interval <seconds>  The interval in seconds to check the connection (default: 180)
-		    -s, --ssid <ssid>         The SSID (i.e. name) of the Wi-Fi network to reconnect to
 		    -v, --verbose             Print more information
 		    -V, --version             Show the version number and exit
-
-		Positional arguments:
-		    ssid           the SSID of the Wi-Fi network to reconnect to
 	END
 }
 
-# Debug logs are disabled by default
-debugLog() { :; }
+debugLog() {
+	if [[ ${verbose} == 'true' ]]; then
+		echo "[$(timestamp)]: $*"
+	fi
+}
 
 errorLog() {
 	echo "$@" >&2
@@ -55,23 +56,13 @@ getCurrentSSID() {
 }
 
 reconnect() {
-	local ssid="$1"
-	local password
-	password="$(security find-generic-password -a "${1}" -s 'AirPort' -w)"
-
-	networksetup -setairportnetwork en0 "${ssid}" "${password}"
+	networksetup -setairportpower en0 off
+	sleep 5 # Sleeping is probably unnecessary
+	networksetup -setairportpower en0 on
 }
 
 main() {
 	local interval=180
-	local ssid
-	local verbose='false'
-
-	debugLog() {
-		if [[ ${verbose} == 'true' ]]; then
-			echo "[$(timestamp)]: $*"
-		fi
-	}
 
 	# Parse arguments
 	while (($# > 0)); do
@@ -84,10 +75,6 @@ main() {
 				;;
 			-i | --interval)
 				interval="$2"
-				shift
-				;;
-			-s | --ssid)
-				ssid="$2"
 				shift
 				;;
 			-v | --verbose)
@@ -108,29 +95,20 @@ main() {
 	# Ensure running as root
 	[[ $EUID -eq 0 ]] || panic 'This script must be run as root.'
 
-	# Set SSID to current SSID if not set
-	if [[ -z ${ssid:-} ]]; then
-		ssid="$(getCurrentSSID)"
-	fi
-
-	# Ensure that the SSID is set
-	[[ -n ${ssid:-} ]] || panic 'SSID not set.'
-
-	debugLog "Checking connection to '$ssid' every $interval seconds…"
+	debugLog "Checking Wi-Fi connection every ${interval} seconds…"
 
 	# Main loop
 	while true; do
 		sleep "$interval"
-		currentSSID="$(getCurrentSSID)"
+		ssid="$(getCurrentSSID)"
 
-		if [[ $currentSSID == "$ssid" ]]; then
+		if [[ $ssid != "" ]]; then
 			debugLog "Connected to '$ssid'."
 			continue
 		fi
 
-		debugLog "Not connected to '$ssid' (currently connected to '$currentSSID'). Reconnecting…"
-
-		reconnect "$ssid" || errorLog "Failed to reconnect to '$ssid'"
+		debugLog "Not connected to a Wi-Fi network. Reconnecting…"
+		reconnect || errorLog "Failed to connect."
 	done
 }
 
