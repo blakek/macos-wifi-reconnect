@@ -52,7 +52,8 @@ unload:
 
 # Full install and load for testing
 .PHONY: install-debug
-install-debug: DEBUG=1 install load
+install-debug: export DEBUG = 1
+install-debug: install load
 
 # Full uninstall and unload for testing
 .PHONY: uninstall-debug
