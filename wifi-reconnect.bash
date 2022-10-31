@@ -8,37 +8,47 @@ set -eu -o pipefail
 # Set TRACE to show all commands that are executed
 [[ "${TRACE:-}" ]] && set -x
 
-declare -Ar globals=(
-	# The directory of the currently running file
-	['cwd']="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-	# The filename of the currently running file
-	['filename']="$(basename "${BASH_SOURCE[0]}")"
-	# The script's version
-	['version']='1.0.0'
-)
+# The directory of the currently running file
+__dirname="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The filename of the currently running file
+__filename="$(basename "${BASH_SOURCE[0]}")"
+# The script's version
+__version='1.0.0'
+
+verbose='false'
 
 showUsage() {
 	cat <<-END
-		Reconncts to a certain Wi-Fi network if the connection is lost.
+		Trys to reconnect to Wi-Fi network if the connection is lost.
 		NOTE: This script requires running as root.
 
 		Usage:
-		    ${globals[filename]} [options]
+		    ${__filename} [options]
 
 		Options:
 		    -h, --help                Show usage information and exit
-		    -i, --interval <seconds>  The interval in seconds to check the connection (default: 10)
-		    -s, --ssid <ssid>         The SSID (i.e. name) of the Wi-Fi network to reconnect to
+		    -i, --interval <seconds>  The interval in seconds to check the connection (default: 180)
 		    -v, --verbose             Print more information
 		    -V, --version             Show the version number and exit
-
-		Positional arguments:
-		    ssid           the SSID of the Wi-Fi network to reconnect to
 	END
 }
 
+debugLog() {
+	if [[ ${verbose} == 'true' ]]; then
+		echo "[$(timestamp)]: $*"
+	fi
+}
+
+errorLog() {
+	echo "$@" >&2
+}
+
+panic() {
+	errorLog "$@"
+	exit 1
+}
+
 airport() { /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport "$@"; }
-airportd() { /usr/libexec/airportd "$@"; }
 timestamp() { date '+%Y-%m-%dT%H:%M:%S'; }
 
 getCurrentSSID() {
@@ -46,29 +56,18 @@ getCurrentSSID() {
 }
 
 reconnect() {
-	airportd assoc --ssid "$1"
+	networksetup -setairportpower en0 off
+	sleep 5 # Sleeping is probably unnecessary
+	networksetup -setairportpower en0 on
 }
 
 main() {
-	local interval=10
-	local ssid
-	local verbose='false'
-
-	debugLog() {
-		[[ ${verbose} == 'true' ]] && echo "[$(timestamp)]: $*"
-	}
-
-	errorLog() {
-		echo "$@" >&2
-	}
-
-	panic() {
-		errorLog "$@"
-		exit 1
-	}
+	local interval=180
 
 	# Parse arguments
-	for arg in "$@"; do
+	while (($# > 0)); do
+		arg="$1"
+
 		case "$arg" in
 			-h | --help | help)
 				showUsage
@@ -76,54 +75,41 @@ main() {
 				;;
 			-i | --interval)
 				interval="$2"
-				shift 2
-				;;
-			-s | --ssid)
-				ssid="$2"
-				shift 2
+				shift
 				;;
 			-v | --verbose)
 				verbose='true'
-				shift
 				;;
 			-V | --version)
-				echo "${globals['version']}"
+				echo "${__version}"
 				exit
 				;;
 			-*)
 				panic "Error: unknown option: $arg"
 				;;
 		esac
+
+		shift
 	done
 
 	# Ensure running as root
 	[[ $EUID -eq 0 ]] || panic 'This script must be run as root.'
 
-	# Set SSID to current SSID if not set
-	if [[ -z ${ssid:-} ]]; then
-		ssid="$(getCurrentSSID)"
-	fi
-
-	# Ensure that the SSID is set
-	[[ -n ${ssid:-} ]] || panic 'SSID not set.'
-
-	debugLog "Checking connection to '$ssid' every $interval seconds…"
+	debugLog "Checking Wi-Fi connection every ${interval} seconds…"
 
 	# Main loop
 	while true; do
 		sleep "$interval"
-		currentSSID="$(getCurrentSSID)"
+		ssid="$(getCurrentSSID)"
 
-		if [[ $currentSSID == "$ssid" ]]; then
+		if [[ $ssid != "" ]]; then
 			debugLog "Connected to '$ssid'."
 			continue
 		fi
 
-		debugLog "Not connected to '$ssid' (currently connected to '$currentSSID'). Reconnecting…"
-
-		reconnect "$ssid" || errorLog "Failed to reconnect to '$ssid'"
+		debugLog "Not connected to a Wi-Fi network. Reconnecting…"
+		reconnect || errorLog "Failed to connect."
 	done
-
 }
 
 main "$@"
