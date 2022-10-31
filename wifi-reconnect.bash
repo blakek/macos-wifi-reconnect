@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-# Reconncts to a certain Wi-Fi network if the connection is lost
+# Reconnects to a Wi-Fi network if the connection is lost
 ##
 
 set -eu -o pipefail
